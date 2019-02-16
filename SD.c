@@ -3,13 +3,14 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-char opcode[6];
 int address = 0 ; 
 
 char * input = "input.asm";
 char * pseudo = "pseudo.txt";
 char * outable = "table.txt";
 char * outlabel = "label.txt";
+
+int firstpass(char * line);
 
 //Conerting Decimal to Binary ( char input to char output )
 int DtoB(char * num,char * binary)
@@ -66,11 +67,16 @@ int  DtoH(char * num,char * hex)
 		i++;
 	}
 	reverse[i]='\0';
-	for (int j = 0 ; j< i ; j++)
+	for(int s = 0; s < 5; s++)
 	{
-		hex[j] = reverse[i - j-1];
+		hex[s] = '0';
 	}
-	hex[i]='\0';
+	
+	for (int j = 4-i ; j<4 ; j++)
+	{
+		hex[j] = reverse[4-j-1];
+	}
+	hex[4]='\0';
 	return 0;
 }
 
@@ -114,11 +120,9 @@ int findandprint(char * ins)
 	fprintf(new ,"%s %s\n",ins,opcode);
 	fclose(new);
 }
-//Not Checed yet
-int  getopcode(char * ins,char * opcode)
+//Not Checked yet
+int  getopcode(FILE * fp ,char * ins,char * opcode)
 {
-	FILE * fp;
-	fp = fopen (outable, "r+");
 	char * find = search_in_file(fp , ins);
 	int i = 0 ;
 	while (find[i++]!=' ');
@@ -127,17 +131,169 @@ int  getopcode(char * ins,char * opcode)
 		opcode[j]= find[i+j];
 	}
 	opcode[4] = '\0';
-
-	fclose(fp);
 	return 0;
 }
 
+
+
+int increment(char * str)
+{
+	if (strstr(str, "H") != NULL){
+		address += 4;
+	}
+	else if (strstr(str, "B") != NULL){
+		address += 4;
+	}
+	else if (strstr(str, "D") != NULL){
+		address += 4;
+	}
+	else{
+		address += 2;
+	}
+}
+
+int opcode (char * op,char * oldline , int pos )
+{
+	findandprint(op);
+	int i = pos;
+	int n = strlen(oldline);
+	char * line;
+	line = malloc(sizeof(char)*n*2);
+	for(int j = 0;j<(n-i);j++)
+	{
+		line[j] = oldline[i+j];
+	}
+	if(line[0]!='\0' && line[0] != '\n'  ){
+
+		if (strcmp(op, "MOV") == 0){
+			increment(line);
+		}
+
+		else if (strcmp(op, "ADD") == 0){
+			increment(line);
+		}
+
+		else if (strcmp(op, "SUB") == 0){
+			increment(line);
+		}
+
+		else if (strcmp(op, "OR") == 0){
+			increment(line);
+		}
+
+		else if (strcmp(op, "AND") == 0){
+			increment(line);
+		}
+
+		else if (strcmp(op, "CMP") == 0){
+			increment(line);
+		}
+
+		else if (strcmp(op, "MUL") == 0){
+			increment(line);
+		}
+
+		else if (strcmp(op, "JMP") == 0){
+				address += 3;
+		}
+
+		else if (strcmp(op, "JNZ") == 0){
+			address += 3;
+		}
+
+		else if (strcmp(op, "NOT") == 0){ 
+			address += 2;
+		}
+
+		else if (strcmp(op, "HLT") == 0){
+			address += 1;
+		}
+
+		else if (strcmp(op, "LOOP") == 0){
+			address += 7;
+			findandprint("SUB");
+			findandprint("JNZ");
+		}
+	}
+}
+
+int label(char * lab , char  * line , int pos)
+{
+	FILE * out ;
+	out = fopen (outlabel, "a+");
+	char ad[1000],reverse[1000];
+	int k = 0;
+	int temp =address;
+	printf("address : %d\n",address);
+	while(temp>0){
+		ad[k++] = temp%10 +'0';
+		temp /= 10;
+		
+	}
+	ad[k] = '\0';	
+	int j;
+	for ( j = 0 ; j< k ; j++)
+	{
+		reverse[j] = ad[k - j-1];
+	}
+	reverse[j]='\0';
+	char hexad[1000];
+	DtoH(reverse,hexad);
+	fprintf(out,"%s: %sH\n",lab,hexad);
+	fclose(out);
+	int i = pos;
+	i++;
+	int n = strlen(line);
+	char * newline;
+	newline = malloc(sizeof(char)*n*2);
+	for(int j = 0;j<(n-i);j++)
+	{
+		newline[j] = line[i+j];
+	}
+	firstpass(newline);
+}
+
+
 int firstpass(char * line)
 {
+	int i = 0;
+	while(line[i] == ' '){
+		i++;
+	}
+	char temp[20] ;
+	int j =0 ;
+	while (line[i] != ' ' && line[i] != ':' )
+	{
+		temp[j] = line[i];
+		j++;
+		i++;
+	}
+	temp[j]= '\0';
+	if( line[i] == ':')
+	{
+		label(temp,line,i);
+	}
+	else
+	{
+		while(line[i]==' ' ){
+			i++;
+		}
+		if (line[i] != ':')
+		{
+			printf("%s\n",temp);
+			opcode(temp ,line,i);
+		}
+		else
+		{
+			label(temp,line, i);
+		}
+	}
+	return 0;
 	
-
-
 }
+
+
+
 
 int  main()
 {
@@ -172,7 +328,9 @@ int  main()
     	{	
     		line[len-1]= '\0';
     		firstpass(line);
+			printf("%d\n",address);
     	}
     }
+	fclose(inputf);
 	return 0;
 }
