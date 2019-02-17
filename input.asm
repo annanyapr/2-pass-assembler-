@@ -1,4 +1,4 @@
-    START 
+    START
     MOV R2, 0003H 
     MOV R31, 0004H 
 L1: ADD R2, 0001H 
