@@ -1107,6 +1107,10 @@ int main(){
 			// convert a string to upper
 			// convertoupper(linechars);
 			//strupr(linechars);
+			for (int i = 0; i < strlen(linechars); i++){
+				linechars[i] = toupper(linechars[i]);
+		
+			}
 			pass1(linechars);
 
 
@@ -1150,6 +1154,10 @@ int main(){
 			// convert a string to upper
 			//convertoupper(linechars);
 			//strupr(linechars);
+			for (int i = 0; i < strlen(linechars); i++){
+				linechars[i] = toupper(linechars[i]);
+		
+			}
 			pass2(linechars);
 
 
@@ -1159,12 +1167,6 @@ int main(){
 
 
     }
-
-
-
-
-
-
 
 
     return(0);
