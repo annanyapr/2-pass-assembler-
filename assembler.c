@@ -410,22 +410,17 @@ int func(char * str){
 	// now check the first word in the string
 
 	int i = 0;
-	while(str[i] == ' '){
+	while(str[i] != '\0'){
 		i++;
+		if (str[i] == ':'){
+			label(str);
+			return(0);
+		}
 	}
-
-	while(str[i] != ' '){
-		i++;
-	}
-
-	if (str[i-1] == ':'){
-		label(str);
-	}
-	else{
-		opcode(str);
-	}
+	opcode(str);
 	return(0);
 
+	
 
 }
 
@@ -455,6 +450,9 @@ int main(){
 				continue;
 
 			}
+
+			if (strstr(linechars, "END") != NULL)
+				break;
 			//flag = 1;
 
 			// call the function giving them values 
