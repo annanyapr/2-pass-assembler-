@@ -4,6 +4,10 @@
 #include <stdlib.h>
 
 
+char * input = "input.asm";
+char * pseuopcode = "pseudo.txt";
+char * op = "opcd.txt";
+
 //FILE * file = fopen("");
 int address = 0;
 
@@ -33,6 +37,23 @@ int search_in_file(char * fname, char* strname){
 	fclose(fp);
 	return(0);
 
+}
+
+char * search_in_file2(char* fname, char* strname){  // returns the pointer to the particular string
+	FILE * fp;
+	fp = fopen(fname, "a+");
+	fseek(fp, 0, SEEK_SET);
+	char* line = NULL;
+	size_t len = 0;
+	while(getline(&line, &len, fp) != -1){
+		if (strstr(line , strname) != NULL){
+			fclose(fp)
+			return strstr(line , strname);
+			
+		}
+	}
+	fclose(fp);
+	return NULL;
 }
 
 
@@ -74,232 +95,328 @@ int opcode(char * str){
 		// first we will search in file
 		// now we will use strcmp with all the possible opcodes to analyse the string
 
-
-		if (search_in_file("opTable.txt", opcd) == 1){
-			// string already exist
-		}
-		else{
-			// string not there
-			// now we will add the string
-			f = fopen("opTable.txt", "a+");
-			
-			for(int i = 0; i < j; i++){
-				fputc(opcd[i], f);
+		if (search_in_file(pseuopcode, opcd) == 0){
+			if (search_in_file("opTable.txt", opcd) == 1){
+				// string already exist
 			}
-			
-			fputc(' ', f);
-			fputc(' ', f);
-			
-
-
-
-
-
-			// now we need to increment the address by the proper amount // this will depend upon the opcode value + the type of inputs provided to us
-			if (strcmp(opcd, "MOV") == 0){
-				if (strstr(str, "H") != NULL){ // transfer the value directly to the register
-					address += 4;
-				}
-				else if (strstr(str, "B") != NULL){
-					address += 4;
-				}
-				else if (strstr(str, "D") != NULL){
-					address += 4;
-				}
-				else{ // register to register
-					address += 2;
-				}
-				fputc('0', f);
-				fputc('0', f);
-				fputc('0', f);
-				fputc('0', f);
-				fputc('\n', f);
-			}
-
-			else if (strcmp(opcd, "ADD") == 0){
-				if (strstr(str, "H") != NULL){ // transfer the value directly to the register
-					address += 4;
-				}
-				else if (strstr(str, "B") != NULL){
-					address += 4;
-				}
-				else if (strstr(str, "D") != NULL){
-					address += 4;
-				}
-				else{ // register to register
-					address += 2;
-				}
-
-				fputc('0', f);
-				fputc('0', f);
-				fputc('0', f);
-				fputc('1', f);
-				fputc('\n', f);
-
-
-			}
-
-			else if (strcmp(opcd, "SUB") == 0){
-				//ddress += 4;
-				if (strstr(str, "H") != NULL){ // transfer the value directly to the register
-					address += 4;
-				}
-				else if (strstr(str, "B") != NULL){
-					address += 4;
-				}
-				else if (strstr(str, "D") != NULL){
-					address += 4;
-				}
-				else{ // register to register
-					address += 2;
-				}
-
-				fputc('0', f);
-				fputc('0', f);
-				fputc('1', f);
-				fputc('0', f);
-				fputc('\n', f);
-			}
-
-			else if (strcmp(opcd, "OR") == 0){
-				if (strstr(str, "H") != NULL){ // transfer the value directly to the register
-					address += 4;
-				}
-				else if (strstr(str, "B") != NULL){
-					address += 4;
-				}
-				else if (strstr(str, "D") != NULL){
-					address += 4;
-				}
-				else{ // register to register
-					address += 2;
-				}
-
-				fputc('0', f);
-				fputc('1', f);
-				fputc('1', f);
-				fputc('0', f);
-				fputc('\n', f);
-			}
-
-			else if (strcmp(opcd, "AND") == 0){
-				if (strstr(str, "H") != NULL){ // transfer the value directly to the register
-					address += 4;
-				}
-				else if (strstr(str, "B") != NULL){
-					address += 4;
-				}
-				else if (strstr(str, "D") != NULL){
-					address += 4;
-				}
-				else{ // register to register
-					address += 2;
-				}
-
-				fputc('0', f);
-				fputc('1', f);
-				fputc('0', f);
-				fputc('1', f);
-				fputc('\n', f);
+			else{
+				// string not there
+				// now we will add the string
+				f = fopen("opTable.txt", "a+");
 				
-			}
+				for(int i = 0; i < j; i++){
+					fputc(opcd[i], f);
+				}
+				
+				fputc(' ', f);
+				fputc(' ', f);
+				
 
-			else if (strcmp(opcd, "CMP") == 0){
-				if (strstr(str, "H") != NULL){ // transfer the value directly to the register
-					address += 4;
+
+
+
+
+				// now we need to increment the address by the proper amount // this will depend upon the opcode value + the type of inputs provided to us
+				if (strcmp(opcd, "MOV") == 0){
+					if (strstr(str, "H") != NULL){ // transfer the value directly to the register
+						address += 4;
+					}
+					else if (strstr(str, "B") != NULL){
+						address += 4;
+					}
+					else if (strstr(str, "D") != NULL){
+						address += 4;
+					}
+					else{ // register to register
+						address += 2;
+					}
+
+					char* start = search_in_file2(op, opcd);
+					int k = 0;
+					while (start[k] != '0' && start[k] != '1'){
+						k++;
+					}
+					while (start[k] == '0' || start[k] == '1'){
+						fputc(start[k], f);
+					}
+					// fputc('0', f);
+					// fputc('0', f);
+					// fputc('0', f);
+					// fputc('0', f);
+					fputc('\n', f);
 				}
-				else if (strstr(str, "B") != NULL){
-					address += 4;
+
+				else if (strcmp(opcd, "ADD") == 0){
+					if (strstr(str, "H") != NULL){ // transfer the value directly to the register
+						address += 4;
+					}
+					else if (strstr(str, "B") != NULL){
+						address += 4;
+					}
+					else if (strstr(str, "D") != NULL){
+						address += 4;
+					}
+					else{ // register to register
+						address += 2;
+					}
+					
+					char* start = search_in_file2(op, opcd);
+					int k = 0;
+					while (start[k] != '0' && start[k] != '1'){
+						k++;
+					}
+					while (start[k] == '0' || start[k] == '1'){
+						fputc(start[k], f);
+					}
+
+					// fputc('0', f);
+					// fputc('0', f);
+					// fputc('0', f);
+					// fputc('1', f);
+					fputc('\n', f);
+
+
 				}
-				else if (strstr(str, "D") != NULL){
-					address += 4;
+
+				else if (strcmp(opcd, "SUB") == 0){
+					//ddress += 4;
+					if (strstr(str, "H") != NULL){ // transfer the value directly to the register
+						address += 4;
+					}
+					else if (strstr(str, "B") != NULL){
+						address += 4;
+					}
+					else if (strstr(str, "D") != NULL){
+						address += 4;
+					}
+					else{ // register to register
+						address += 2;
+					}
+					char* start = search_in_file2(op, opcd);
+					int k = 0;
+					while (start[k] != '0' && start[k] != '1'){
+						k++;
+					}
+					while (start[k] == '0' || start[k] == '1'){
+						fputc(start[k], f);
+					}
+					
+					// fputc('0', f);
+					// fputc('0', f);
+					// fputc('1', f);
+					// fputc('0', f);
+					fputc('\n', f);
 				}
-				else{ // register to register
+
+				else if (strcmp(opcd, "OR") == 0){
+					if (strstr(str, "H") != NULL){ // transfer the value directly to the register
+						address += 4;
+					}
+					else if (strstr(str, "B") != NULL){
+						address += 4;
+					}
+					else if (strstr(str, "D") != NULL){
+						address += 4;
+					}
+					else{ // register to register
+						address += 2;
+					}
+
+					char* start = search_in_file2(op, opcd);
+					int k = 0;
+					while (start[k] != '0' && start[k] != '1'){
+						k++;
+					}
+					while (start[k] == '0' || start[k] == '1'){
+						fputc(start[k], f);
+					}
+					
+					// fputc('0', f);
+					// fputc('1', f);
+					// fputc('1', f);
+					// fputc('0', f);
+					fputc('\n', f);
+				}
+
+				else if (strcmp(opcd, "AND") == 0){
+					if (strstr(str, "H") != NULL){ // transfer the value directly to the register
+						address += 4;
+					}
+					else if (strstr(str, "B") != NULL){
+						address += 4;
+					}
+					else if (strstr(str, "D") != NULL){
+						address += 4;
+					}
+					else{ // register to register
+						address += 2;
+					}
+					char* start = search_in_file2(op, opcd);
+					int k = 0;
+					while (start[k] != '0' && start[k] != '1'){
+						k++;
+					}
+					while (start[k] == '0' || start[k] == '1'){
+						fputc(start[k], f);
+					}
+					
+					// fputc('0', f);
+					// fputc('1', f);
+					// fputc('0', f);
+					// fputc('1', f);
+					fputc('\n', f);
+					
+				}
+
+				else if (strcmp(opcd, "CMP") == 0){
+					if (strstr(str, "H") != NULL){ // transfer the value directly to the register
+						address += 4;
+					}
+					else if (strstr(str, "B") != NULL){
+						address += 4;
+					}
+					else if (strstr(str, "D") != NULL){
+						address += 4;
+					}
+					else{ // register to register
+						address += 2;
+					}
+					char* start = search_in_file2(op, opcd);
+					int k = 0;
+					while (start[k] != '0' && start[k] != '1'){
+						k++;
+					}
+					while (start[k] == '0' || start[k] == '1'){
+						fputc(start[k], f);
+					}
+					
+					// fputc('0', f);
+					// fputc('1', f);
+					// fputc('0', f);
+					// fputc('0', f);
+					fputc('\n', f);
+				}
+
+
+				else if (strcmp(opcd, "MUL") == 0){
+					if (strstr(str, "H") != NULL){ // transfer the value directly to the register
+						address += 4;
+					}
+					else if (strstr(str, "B") != NULL){
+						address += 4;
+					}
+					else if (strstr(str, "D") != NULL){
+						address += 4;
+					}
+					else{ // register to register
+						address += 2;
+					}
+					char* start = search_in_file2(op, opcd);
+					int k = 0;
+					while (start[k] != '0' && start[k] != '1'){
+						k++;
+					}
+					while (start[k] == '0' || start[k] == '1'){
+						fputc(start[k], f);
+					}
+					
+					// fputc('0', f);
+					// fputc('0', f);
+					// fputc('1', f);
+					// fputc('1', f);
+					fputc('\n', f);
+				}
+
+				else if (strcmp(opcd, "JMP") == 0){
+					address += 3;
+					char* start = search_in_file2(op, opcd);
+					int k = 0;
+					while (start[k] != '0' && start[k] != '1'){
+						k++;
+					}
+					while (start[k] == '0' || start[k] == '1'){
+						fputc(start[k], f);
+					}
+					
+					// fputc('1', f);
+					// fputc('0', f);
+					// fputc('0', f);
+					// fputc('0', f);
+					fputc('\n', f);
+				}
+
+				else if (strcmp(opcd, "JNZ") == 0){
+					address += 3;
+					char* start = search_in_file2(op, opcd);
+					int k = 0;
+					while (start[k] != '0' && start[k] != '1'){
+						k++;
+					}
+					while (start[k] == '0' || start[k] == '1'){
+						fputc(start[k], f);
+					}
+					// fputc('1', f);
+					// fputc('0', f);
+					// fputc('1', f);
+					// fputc('1', f);
+					fputc('\n', f);
+				}
+
+				else if (strcmp(opcd, "NOT") == 0){  // only take the register case 
 					address += 2;
+					char* start = search_in_file2(op, opcd);
+					int k = 0;
+					while (start[k] != '0' && start[k] != '1'){
+						k++;
+					}
+					while (start[k] == '0' || start[k] == '1'){
+						fputc(start[k], f);
+					}
+					// fputc('0', f);
+					// fputc('1', f);
+					// fputc('1', f);
+					// fputc('1', f);
+					fputc('\n', f);
 				}
 
-				fputc('0', f);
-				fputc('1', f);
-				fputc('0', f);
-				fputc('0', f);
-				fputc('\n', f);
-			}
-
-
-			else if (strcmp(opcd, "MUL") == 0){
-				if (strstr(str, "H") != NULL){ // transfer the value directly to the register
-					address += 4;
-				}
-				else if (strstr(str, "B") != NULL){
-					address += 4;
-				}
-				else if (strstr(str, "D") != NULL){
-					address += 4;
-				}
-				else{ // register to register
-					address += 2;
+				else if (strcmp(opcd, "HLT") == 0){
+					address += 1;
+					char* start = search_in_file2(op, opcd);
+					int k = 0;
+					while (start[k] != '0' && start[k] != '1'){
+						k++;
+					}
+					while (start[k] == '0' || start[k] == '1'){
+						fputc(start[k], f);
+					}
+					// fputc('1', f);
+					// fputc('0', f);
+					// fputc('1', f);
+					// fputc('0', f);
+					fputc('\n', f);
 				}
 
-				fputc('0', f);
-				fputc('0', f);
-				fputc('1', f);
-				fputc('1', f);
-				fputc('\n', f);
+				else if (strcmp(opcd, "LOOP") == 0){
+					address += 7;
+					char* start = search_in_file2(op, opcd);
+					int k = 0;
+					while (start[k] != '0' && start[k] != '1'){
+						k++;
+					}
+					while (start[k] == '0' || start[k] == '1'){
+						fputc(start[k], f);
+					}
+					// fputc('1', f);
+					// fputc('0', f);
+					// fputc('0', f);
+					// fputc('1', f);
+					fputc('\n', f);
+				}
+
+				fclose(f);
+
+
 			}
-
-			else if (strcmp(opcd, "JMP") == 0){
-				address += 3;
-
-				fputc('1', f);
-				fputc('0', f);
-				fputc('0', f);
-				fputc('0', f);
-				fputc('\n', f);
-			}
-
-			else if (strcmp(opcd, "JNZ") == 0){
-				address += 3;
-
-				fputc('1', f);
-				fputc('0', f);
-				fputc('1', f);
-				fputc('1', f);
-				fputc('\n', f);
-			}
-
-			else if (strcmp(opcd, "NOT") == 0){  // only take the register case 
-				address += 2;
-
-				fputc('0', f);
-				fputc('1', f);
-				fputc('1', f);
-				fputc('1', f);
-				fputc('\n', f);
-			}
-
-			else if (strcmp(opcd, "HLT") == 0){
-				address += 1;
-
-				fputc('1', f);
-				fputc('0', f);
-				fputc('1', f);
-				fputc('0', f);
-				fputc('\n', f);
-			}
-
-			else if (strcmp(opcd, "LOOP") == 0){
-				address += 7;
-
-				fputc('1', f);
-				fputc('0', f);
-				fputc('0', f);
-				fputc('1', f);
-				fputc('\n', f);
-			}
-
-			fclose(f);
-
-
 		}
 
 	}
@@ -399,12 +516,6 @@ int label(char* str){
 
 }
 
-
-
-
-
-
-
 int func(char * str){
 
 	// now check the first word in the string
@@ -420,7 +531,7 @@ int func(char * str){
 	opcode(str);
 	return(0);
 
-	
+
 
 }
 
@@ -433,7 +544,7 @@ int main(){
     ssize_t read;
 
     int len = 0;
-	f = fopen("input.asm", "r");
+	f = fopen(input, "r");
 	int flag = 0;
 	while ((read = getline(&linechars, &length, f)) != -1) {
         //len = strlen(linechars); // gives the length of the string array with the new line in place 
@@ -454,6 +565,7 @@ int main(){
 			if (strstr(linechars, "END") != NULL)
 				break;
 			//flag = 1;
+
 
 			// call the function giving them values 
 
