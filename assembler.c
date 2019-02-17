@@ -13,7 +13,7 @@ int address = 0;
 
 
 
-int convertoupper(char * str){
+int convertoupper(char * str){  // converts string to upper
 	for (int i = 0; i < strlen(str); i++){
 		toupper(str[i]);
 	}
@@ -47,7 +47,7 @@ int search_in_file(char * fname, char* strname){
 
 }
 
-char * search_in_file2(char* fname, char* strname){  // returns the pointer to the particular string
+char * search_in_file2(char* fname, char* strname){  // returns the pointer to the particular string in a file 
 	FILE * fp;
 	fp = fopen(fname, "a+");
 	fseek(fp, 0, SEEK_SET);
@@ -70,7 +70,7 @@ char * search_in_file2(char* fname, char* strname){  // returns the pointer to t
 
 
 
-int opcode(char * str){
+int opcode(char * str){  // deals with the opcode part of the code
 
 	FILE * f;
 	char opcd[5];
@@ -125,8 +125,7 @@ int opcode(char * str){
 
 
 
-
-			// now we need to increment the address by the proper amount // this will depend upon the opcode value + the type of inputs provided to us
+			// now search for a particular opcode from the file and increase the global address
 			if (strcmp(opcd, "MOV") == 0){
 				
 
@@ -325,7 +324,7 @@ int opcode(char * str){
 
 		}
 
-		if (strcmp(opcd, "MOV") == 0){
+		if (strcmp(opcd, "MOV") == 0){ // now we will add to the address on the basis of the opcode and conditions
 			if (strstr(str, "H") != NULL){ // transfer the value directly to the register
 				address += 4;
 			}
@@ -529,7 +528,7 @@ int label(char* str){
 	
 
 
-	for (int i = 0; i < 4; i++){
+	for (int i = 0; i < 4; i++){   // converts into hexa form
 		switch(hex[i]){
 			case 10: c = 'A';
 				break;
@@ -574,18 +573,9 @@ int label(char* str){
 }
 
 
-// char* concat(const char *s1, const char *s2)
-// {
-//     char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
-//     // in real code you would check for errors in malloc here
-//     strcpy(result, s1);
-//     strcat(result, s2);
-//     return result;
-// }
 
-int pass1(char * str){
 
-	// now check the first word in the string
+int pass1(char * str){  // now do your first pass
 
 	int i = 0;
 	while(str[i] != '\0'){
@@ -618,20 +608,23 @@ char* concat(const char *s1, const char *s2)
 int pass2(char* str);
 
 
-int filewrite(char* str){
+int filewrite(char* str){   // writes for the first pass
 
 	int i = 0;
 	while (str[i] == ' '){
 		i++;
 	}
 	if (str[i] == '\0'){
+		FILE * f;
+		f = fopen("output.o", "a+");
+		fclose(f);
 		return(0);
 	}
 
 	char opcd[5];
 	int j = 0;
 
-	while (str[i] != ' '){
+	while (str[i] != ' ' && str[i] != '\0'){
 		opcd[j] = str[i];
 		i++;
 		j++;
@@ -647,7 +640,7 @@ int filewrite(char* str){
 
 
 
-	if (strcmp(opcd, "LOOP") != 0){
+	if (strcmp(opcd, "LOOP") != 0){   // only run if the op code is not loop
 		
 		int hex[4];
 		int temp = address2;
@@ -694,7 +687,7 @@ int filewrite(char* str){
 		fputc(' ', f);
 
 
-		char* str1 = search_in_file2("opTable.txt" , opcd);
+		char* str1 = search_in_file2("opTable.txt" , opcd);  // prints the opcode
 		if (str1 != NULL){
 		
 			for (int k = 0; k < 4; k++){
@@ -710,7 +703,7 @@ int filewrite(char* str){
 	
 	
 
-	// now use the loop again to scan through the next parts 
+	// now use the loop again to scan through the next parts // we will check the opcodes in parts
 	if (strcmp(opcd, "AND") == 0 || strcmp(opcd, "OR") == 0 || strcmp(opcd, "MOV") == 0 || strcmp(opcd, "SUB") == 0 || strcmp(opcd, "ADD") == 0 || strcmp(opcd, "CMP") == 0){
 		while(str[i] != 'R'){
 			i++;
@@ -718,7 +711,7 @@ int filewrite(char* str){
 		i++;
 		int arr[5]; 
 		// now i is positioned at the register number 
-		if (str[i+1] == ' ' || str[i+1] == ','){
+		if (str[i+1] == ' ' || str[i+1] == ',' ){
 			// only singlr digit value 
 			int a = str[i] - '0';
 			
@@ -744,15 +737,15 @@ int filewrite(char* str){
 		}
 
 		fputc(' ', f);
-		while (str[i] == ' '|| str[i] == ',' ){
+		while ((str[i] == ' '|| str[i] == ',') && str[i] != '\0' ){
 			i++;
 		}
 		// now you are either on a number or a letter in case of the register
 		int num = 0;
-		if (strstr(str+i, "H") != NULL){
+		if (strstr(str+i, "H") != NULL){   // if the number is in hexa value
 			// you have a hexa value in front of you
 			int temp = 0;
-			while(str[i] != 'H'){
+			while(str[i] != 'H' && str[i] != '\0'){
 				temp *= 16;
 				switch(str[i]){
 					case 'A': temp += 10;
@@ -798,10 +791,10 @@ int filewrite(char* str){
 		}
 		else if (strstr(str+i, "D") != NULL){
 			// you have a Decimal value in front of you
-
+			// if the number is in decimal form
 			int temp = 0 ;
 			int numb[16];
-			while (str[i] != 'D'){
+			while (str[i] != 'D' && str[i] != '\0'){
 				temp *= 10;
 				temp += str[i] - '0';
 				i++;
@@ -824,11 +817,11 @@ int filewrite(char* str){
 
 		}
 		else if (strstr(str+i, "B") != NULL ){
-			// you have a decimal value in front of you
+			// you have a decimal value in front of you   // if the number is in binary form
 
 			int temp = 0 ;
 			int numb[16];
-			while (str[i] != 'B'){
+			while (str[i] != 'B' && str[i] != '\0'){
 				temp *= 2;
 				temp += str[i] - '0';
 				i++;
@@ -851,11 +844,11 @@ int filewrite(char* str){
 
 		}
 		else{
-			i++; // now we have jumped to the numerical value on the register
+			i++; // now we have jumped to the numerical value on the register  // if register addressing
 
 			int arr[5] ;
 			// now i is positioned at the register number 
-			if (str[i+1] == ' ' || str[i+1] == ','){
+			if (str[i+1] == ' ' || str[i+1] == ',' || str[i+1] == '\0'){
 				// only singlr digit value 
 				int a = str[i] - '0';
 				
@@ -865,7 +858,7 @@ int filewrite(char* str){
 				}
 				i += 1;
 			}
-			else if (str[i+2] == ' ' || str[i+2] == ','){
+			else if (str[i+2] == ' ' || str[i+2] == ',' || str[i+2] == '\0'){
 				// double digit value
 				int a = (str[i]- '0')* 10 + (str[i+1] - '0');
 				for (int i = 0; i < 5; i++){
@@ -887,7 +880,7 @@ int filewrite(char* str){
 		}
 
 	}
-	else if (strcmp(opcd, "NOT") == 0 || strcmp(opcd, "MUL") == 0 ){
+	else if (strcmp(opcd, "NOT") == 0 || strcmp(opcd, "MUL") == 0 ){  // if the opcodes are not and mul
 		if (strcmp(opcd, "MUL") == 0){
 			fputc('0', f);
 			fputc('0', f);
@@ -903,7 +896,7 @@ int filewrite(char* str){
 		i++;
 		int arr[5] ;
 		// now i is positioned at the register number 
-		if (str[i+1] == ' ' || str[i+1] == ','){
+		if (str[i+1] == ' ' || str[i+1] == ','|| str[i+1] == '\0'){  // can only take register values
 			// only singlr digit value 
 			int a = str[i] - '0';
 			
@@ -913,7 +906,7 @@ int filewrite(char* str){
 			}
 			i += 1;
 		}
-		else if (str[i+2] == ' ' || str[i+2] == ','){
+		else if (str[i+2] == ' ' || str[i+2] == ',' || str[i+2] == '\0'){ 
 			// double digit value
 			int a = (str[i]- '0')* 10 + (str[i+1] - '0');
 			for (int i = 0; i < 5; i++){
@@ -941,14 +934,12 @@ int filewrite(char* str){
 			// call itself by using two strings
 			pass2(" SUB R31, 0001H ");
 			char * loop1 = " JNZ ";
-			// NOW CALL WITH THE JNZ command with the label in the front
+			// NOW CALL WITH THE JNZ command with the label in the end
 			while(str[i] == ' '){
 				i++;
 			}
-			// while(str[i] != ' '){
-			// 	concat(loop1, str + i); // now loop1 holds the concatenated string
-			// }
-			pass2(concat(loop1, str + i));
+			
+			pass2(concat(loop1, str + i));  // concat function concatenates two strings
 			fclose(f);
 			return(0);
 		
@@ -969,7 +960,7 @@ int filewrite(char* str){
 			char* lab = search_in_file2("symTable.txt", str + i);
 
 			int q = 0;
-			while(lab[q] != ' '){
+			while(lab[q] != ' ' && lab[q] != '\0'){
 				q++;
 			}
 			while(lab[q] == ' '){
@@ -981,7 +972,7 @@ int filewrite(char* str){
 
 
 			int temp = 0;
-			while(lab[q] != 'H'){
+			while(lab[q] != 'H'  && lab[q] != '\0'){
 				temp *= 16;
 				switch(lab[q]){
 					case 'A': temp += 10;
@@ -1037,9 +1028,7 @@ int filewrite(char* str){
 int pass2(char* str){
 
 
-	// read line by line On one side there will be regular opcdodes like add and subtract
-	// On the other side there will be JMP LOOP JNZ
-	// first check if the line has a label
+	// runs the second pass if contains a semicolon than send without the label part
 	int flag = 0; 
 	for (int i = 0; i < strlen(str); i++){
 		if (str[i] == ':'){
@@ -1068,6 +1057,7 @@ int pass2(char* str){
 
 
 int main(){
+	// runs the first pass
 
 	FILE * f;
 	char* linechars = NULL;
@@ -1078,13 +1068,12 @@ int main(){
 	f = fopen(input, "r");
 	int flag = 0;
 	while ((read = getline(&linechars, &length, f)) != -1) {
-        //len = strlen(linechars); // gives the length of the string array with the new line in place 
-        //printf("%s %d", linechars, len);
+       
 		len = strlen(linechars);
 
 		linechars[len-1] = '\0';
 		for (int i = 0; i < len; i++){
-			if (linechars[i] == ';'){
+			if (linechars[i] == ';'){  // helps in managing comments
 				linechars[i] = '\0';
 			}
 		}
@@ -1103,11 +1092,8 @@ int main(){
 			
 
 
-			// call the function giving them values 
-			// convert a string to upper
-			// convertoupper(linechars);
-			//strupr(linechars);
-			for (int i = 0; i < strlen(linechars); i++){
+			
+			for (int i = 0; i < strlen(linechars); i++){ // converts everything to upper case
 				linechars[i] = toupper(linechars[i]);
 		
 			}
@@ -1119,21 +1105,20 @@ int main(){
 		linechars = NULL;
 
 
-    }
-
+    }  
+// run the second pass
     linechars = NULL;
     fclose(f);
     f = fopen(input, "r");
     flag = 0;
 
 	while ((read = getline(&linechars, &length, f)) != -1) {
-        //len = strlen(linechars); // gives the length of the string array with the new line in place 
-        //printf("%s %d", linechars, len);
+        
 		len = strlen(linechars);
 
 		linechars[len-1] = '\0';
 		for (int i = 0; i < len; i++){
-			if (linechars[i] == ';'){
+			if (linechars[i] == ';'){    // helps in managing comments
 				linechars[i] = '\0';
 			}
 		}
@@ -1150,11 +1135,8 @@ int main(){
 			if (strstr(linechars, "END") != NULL)
 				break;
 			
-			// call the function giving them values 
-			// convert a string to upper
-			//convertoupper(linechars);
-			//strupr(linechars);
-			for (int i = 0; i < strlen(linechars); i++){
+			
+			for (int i = 0; i < strlen(linechars); i++){  // converts everything to upper case
 				linechars[i] = toupper(linechars[i]);
 		
 			}
