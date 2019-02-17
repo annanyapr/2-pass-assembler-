@@ -4,8 +4,11 @@
 L1: ADD R2, 0001H
     LOOP L1
     MUL R3
+    SUB R25,R5
+    JNZ L2
     AND R2, R9
     JMP L2
+    CMP R2, 0000H
     OR R2, R5
 L2: HLT
     END
